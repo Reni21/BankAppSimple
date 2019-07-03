@@ -33,7 +33,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account findAccountByNumber(String accountNumber) throws AccountNotFoundException {
+    public Account findAccountByNumber(String accountNumber) {
         return accountDao.findAccountByNumber(accountNumber);
     }
 
