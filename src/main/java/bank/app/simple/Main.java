@@ -14,8 +14,6 @@ import bank.app.simple.serviceimpl.ExchangeRateServiceImpl;
 import bank.app.simple.serviceimpl.UserServiceImpl;
 import bank.app.simple.client.ExchangeRateExternalClient;
 
-import java.io.IOException;
-
 public class Main {
     private static ExchangeRateDao rateDao = new ExchangeRateDaoImpl();
     private static TransactionDao transDao = new TransactionDaoImpl();
