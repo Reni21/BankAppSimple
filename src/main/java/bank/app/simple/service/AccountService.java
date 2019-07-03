@@ -29,4 +29,6 @@ public interface AccountService {
 
     void deleteAccount(Long id) throws AccountNotFoundException;
 
+    double totalUserBalansInUAH(String personalNumber);
+
 }

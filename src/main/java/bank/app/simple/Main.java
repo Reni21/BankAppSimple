@@ -1,31 +1,34 @@
 package bank.app.simple;
 
-import bank.app.simple.dao.AccountDao;
 import bank.app.simple.dao.ExchangeRateDao;
 import bank.app.simple.dao.TransactionDao;
-import bank.app.simple.daoimpl.*;
+import bank.app.simple.daoimpl.AccountDaoImpl;
+import bank.app.simple.daoimpl.ExchangeRateDaoImpl;
+import bank.app.simple.daoimpl.TransactionDaoImpl;
+import bank.app.simple.daoimpl.UserDaoImpl;
 import bank.app.simple.entity.*;
-import bank.app.simple.exception.AccountNotFoundException;
 import bank.app.simple.exception.BankException;
 import bank.app.simple.exception.NotEnoughMoneyException;
 import bank.app.simple.serviceimpl.AccountServiceImpl;
 import bank.app.simple.serviceimpl.ExchangeRateServiceImpl;
 import bank.app.simple.serviceimpl.UserServiceImpl;
+import bank.app.simple.client.ExchangeRateExternalClient;
 
 import java.io.IOException;
 
 public class Main {
     private static ExchangeRateDao rateDao = new ExchangeRateDaoImpl();
     private static TransactionDao transDao = new TransactionDaoImpl();
-    private static UserServiceImpl userService = new UserServiceImpl(new UserDaoImpl(), rateDao);
-    private static ExchangeRateServiceImpl rateService = new ExchangeRateServiceImpl(rateDao);
-    private static AccountServiceImpl accountService = new AccountServiceImpl(new AccountDaoImpl(), rateDao, transDao);
+    private static UserServiceImpl userService = new UserServiceImpl(new UserDaoImpl());
+    private static ExchangeRateExternalClient exchangeRateClient = new ExchangeRateExternalClient();
+    private static ExchangeRateServiceImpl rateService = new ExchangeRateServiceImpl(rateDao, exchangeRateClient);
+    private static AccountServiceImpl accountService = new AccountServiceImpl(new AccountDaoImpl(), transDao, rateService);
 
-    public static void main(String[] args) throws BankException, IOException {
+    public static void main(String[] args) throws BankException {
         fillTables();
         System.out.println(
                 ">-------- Total balance from accounts for user US222 = " +
-                        userService.totalUserBalansInUAH("US222") + " UAH");
+                        accountService.totalUserBalansInUAH("US222") + " UAH");
         try {
             accountService.withdrawFromAccount(250.0, "AC444");
         } catch (NotEnoughMoneyException ex) {

@@ -1,12 +1,17 @@
 package bank.app.simple.serviceimpl;
 
 import bank.app.simple.dao.AccountDao;
-import bank.app.simple.dao.ExchangeRateDao;
 import bank.app.simple.dao.TransactionDao;
-import bank.app.simple.entity.*;
-import bank.app.simple.exception.*;
+import bank.app.simple.entity.Account;
+import bank.app.simple.entity.Currency;
+import bank.app.simple.entity.Transaction;
+import bank.app.simple.entity.TransactionType;
+import bank.app.simple.exception.AccountNotFoundException;
+import bank.app.simple.exception.AccountNumberNotUnicException;
+import bank.app.simple.exception.BankException;
+import bank.app.simple.exception.NotEnoughMoneyException;
 import bank.app.simple.service.AccountService;
-import bank.app.simple.util.ExchangeRateUtil;
+import bank.app.simple.service.ExchangeRateService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -14,13 +19,15 @@ import java.util.List;
 
 public class AccountServiceImpl implements AccountService {
     private final AccountDao accountDao;
-    private final ExchangeRateDao rateDao;
     private final TransactionDao transDao;
+    private final ExchangeRateService exchangeRateService;
 
-    public AccountServiceImpl(AccountDao accountDao, ExchangeRateDao rateDao, TransactionDao transDao) {
+    public AccountServiceImpl(AccountDao accountDao,
+                              TransactionDao transDao,
+                              ExchangeRateService exchangeRateService) {
         this.accountDao = accountDao;
-        this.rateDao = rateDao;
         this.transDao = transDao;
+        this.exchangeRateService = exchangeRateService;
     }
 
     @Override
@@ -54,7 +61,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void transferMoney(double sum, String fromNumber, String toNumber) throws BankException, IOException {
+    public void transferMoney(double sum, String fromNumber, String toNumber) throws BankException {
         Account accFrom = checkAccountNumberExists(fromNumber);
         Account accTo = checkAccountNumberExists(toNumber);
 
@@ -70,7 +77,7 @@ public class AccountServiceImpl implements AccountService {
 
             } else {
                 double convertedSum =
-                        ExchangeRateUtil.convertMoney(rateDao, accFrom.getCurrency(), accTo.getCurrency(), sum);
+                        exchangeRateService.convertMoney(accFrom.getCurrency(), accTo.getCurrency(), sum);
                 accTo.setBalance(accTo.getBalance() + convertedSum);
                 transDao.create(
                         new Transaction(TransactionType.DEPOSITE, accFrom, accTo, convertedSum, LocalDateTime.now()));
@@ -118,6 +125,24 @@ public class AccountServiceImpl implements AccountService {
     public void deleteAccount(Long id) throws AccountNotFoundException {
         Account account = checkAccountExists(id);
         accountDao.delete(account, id);
+    }
+
+    @Override
+    public double totalUserBalansInUAH(String personalNumber) {
+        List<Account> accounts = accountDao.findAllUserAccounts(personalNumber);
+        double totalBalans = 0.0;
+        if (accounts.isEmpty()) {
+            return totalBalans;
+        }
+        for (Account account : accounts) {
+            double accBalans = account.getBalance();
+            if (account.getCurrency() == Currency.UAH) {
+                totalBalans += accBalans;
+            } else {
+                totalBalans += exchangeRateService.convertMoney(account.getCurrency(), Currency.UAH, accBalans);
+            }
+        }
+        return totalBalans;
     }
 
     private Account checkAccountExists(Long id) throws AccountNotFoundException {

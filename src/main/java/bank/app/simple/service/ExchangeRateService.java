@@ -17,4 +17,6 @@ public interface ExchangeRateService {
     void updateRate(ExchangeRate rate);
 
     void deleteRate(Long id);
+
+    double convertMoney(Currency curFrom, Currency curTo, double sum);
 }

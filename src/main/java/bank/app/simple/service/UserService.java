@@ -12,11 +12,9 @@ public interface UserService {
 
     User findUserById(Long id);
 
-    double totalUserBalansInUAH(String personalNumber) throws UserNotFoundException, IOException;
-
     List<User> findAllUsers();
 
-    void updateUser(User user);
+    void updateUser(User user) throws UserNotFoundException;
 
-    void deleteUser(Long id);
+    void deleteUser(Long id) throws UserNotFoundException;
 }
