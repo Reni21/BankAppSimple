@@ -1,5 +1,6 @@
 package bank.app.simple.util;
 
+import bank.app.simple.dao.ExchangeRateDao;
 import bank.app.simple.entity.Currency;
 import bank.app.simple.entity.ExchangeRate;
 import lombok.AccessLevel;
@@ -12,9 +13,32 @@ import java.net.URL;
 import java.net.URLConnection;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class AccountUtil {
+public class ExchangeRateUtil {
 
-    public static ExchangeRate getRateFromPrivateBank(Currency type) throws IOException {
+    public static double convertMoney(ExchangeRateDao rateDao, Currency curFrom, Currency curTo, double sum) throws IOException {
+        double convertedSum;
+        ExchangeRate rate;
+
+        if (curFrom == Currency.UAH) {
+            rate = getRateFromPrivateBank(curTo);
+            if (rate == null){
+                rate = rateDao.findRateByCurrency(curTo);
+            }
+            convertedSum = sum / rate.getBuyRate();
+        } else if (curTo == Currency.UAH) {
+            rate = getRateFromPrivateBank(curFrom);
+            if (rate == null){
+                rate = rateDao.findRateByCurrency(curFrom);
+            }
+            convertedSum = sum * rate.getSellRate();
+        } else {
+            convertedSum = convertMoney(rateDao, curFrom, Currency.UAH, sum);
+            convertedSum = convertMoney(rateDao, Currency.UAH, curTo, convertedSum);
+        }
+        return convertedSum;
+    }
+
+    private static ExchangeRate getRateFromPrivateBank(Currency type) throws IOException {
         URL url = new URL("https://api.privatbank.ua/p24api/pubinfo?exchange&coursid=3");
         URLConnection conn = url.openConnection();
         if (conn == null) {
@@ -61,4 +85,5 @@ public class AccountUtil {
         }
         return new double[]{buyRate, saleRate};
     }
+
 }

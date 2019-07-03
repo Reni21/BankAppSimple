@@ -4,12 +4,9 @@ import bank.app.simple.dao.AccountDao;
 import bank.app.simple.dao.ExchangeRateDao;
 import bank.app.simple.dao.TransactionDao;
 import bank.app.simple.entity.*;
-import bank.app.simple.exception.AccountNotFoundException;
-import bank.app.simple.exception.AccountNumberNotUnicException;
-import bank.app.simple.exception.BankException;
-import bank.app.simple.exception.NotEnoughMoneyException;
+import bank.app.simple.exception.*;
 import bank.app.simple.service.AccountService;
-import bank.app.simple.util.AccountUtil;
+import bank.app.simple.util.ExchangeRateUtil;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -33,11 +30,6 @@ public class AccountServiceImpl implements AccountService {
             throw new AccountNumberNotUnicException(account.getAccountNumber());
         }
         account.setId(id);
-    }
-
-    @Override
-    public Account findAccountById(Long id) throws AccountNotFoundException {
-        return checkAccountExists(id);
     }
 
     @Override
@@ -77,7 +69,8 @@ public class AccountServiceImpl implements AccountService {
                         new Transaction(TransactionType.DEPOSITE, accFrom, accTo, sum, LocalDateTime.now()));
 
             } else {
-                double convertedSum = convertMoney(accFrom.getCurrency(), accTo.getCurrency(), sum);
+                double convertedSum =
+                        ExchangeRateUtil.convertMoney(rateDao, accFrom.getCurrency(), accTo.getCurrency(), sum);
                 accTo.setBalance(accTo.getBalance() + convertedSum);
                 transDao.create(
                         new Transaction(TransactionType.DEPOSITE, accFrom, accTo, convertedSum, LocalDateTime.now()));
@@ -88,29 +81,6 @@ public class AccountServiceImpl implements AccountService {
         } else {
             throw new NotEnoughMoneyException("transfer");
         }
-    }
-
-    private double convertMoney(Currency curFrom, Currency curTo, double sum) throws IOException {
-        double convertedSum;
-        ExchangeRate rate;
-
-        if (curFrom == Currency.UAH) {
-            rate = AccountUtil.getRateFromPrivateBank(curTo);
-            if (rate == null){
-                rate = rateDao.findRateByCurrency(curTo);
-            }
-            convertedSum = sum / rate.getBuyRate();
-        } else if (curTo == Currency.UAH) {
-            rate = AccountUtil.getRateFromPrivateBank(curFrom);
-            if (rate == null){
-                rate = rateDao.findRateByCurrency(curFrom);
-            }
-            convertedSum = sum * rate.getSellRate();
-        } else {
-            convertedSum = convertMoney(curFrom, Currency.UAH, sum);
-            convertedSum = convertMoney(Currency.UAH, curTo, convertedSum);
-        }
-        return convertedSum;
     }
 
     @Override

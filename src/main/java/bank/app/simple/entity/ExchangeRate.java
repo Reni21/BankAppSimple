@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Setter
 @EqualsAndHashCode
 @Entity
-@Table(name = "exchange_rate")
+@Table(name = "exchange_rates")
 public class ExchangeRate {
     @Id @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")

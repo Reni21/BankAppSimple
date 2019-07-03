@@ -1,7 +1,6 @@
 package bank.app.simple.dao;
 
 import bank.app.simple.entity.Account;
-import bank.app.simple.entity.User;
 
 import java.util.List;
 

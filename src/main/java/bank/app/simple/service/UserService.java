@@ -2,17 +2,21 @@ package bank.app.simple.service;
 
 import bank.app.simple.entity.User;
 import bank.app.simple.exception.PersonalNumberNotUniqueExecption;
+import bank.app.simple.exception.UserNotFoundException;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
-    public void addUser(User user) throws PersonalNumberNotUniqueExecption;
+     void addUser(User user) throws PersonalNumberNotUniqueExecption;
 
-    public User findUserById(Long id);
+    User findUserById(Long id);
 
-    public List<User> findAllUsers();
+    double totalUserBalansInUAH(String personalNumber) throws UserNotFoundException, IOException;
 
-    public void updateUser(User user);
+    List<User> findAllUsers();
 
-    public void deleteUser(Long id);
+    void updateUser(User user);
+
+    void deleteUser(Long id);
 }

@@ -1,9 +1,6 @@
 package bank.app.simple.service;
 
 import bank.app.simple.entity.Transaction;
-import bank.app.simple.entity.TransactionType;
-
-import java.util.List;
 
 public interface TransactionService {
     void addTransaction(Transaction transaction);

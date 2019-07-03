@@ -1,7 +1,6 @@
 package bank.app.simple.service;
 
 import bank.app.simple.entity.Account;
-import bank.app.simple.entity.User;
 import bank.app.simple.exception.AccountNotFoundException;
 import bank.app.simple.exception.AccountNumberNotUnicException;
 import bank.app.simple.exception.BankException;
@@ -13,8 +12,6 @@ import java.util.List;
 public interface AccountService {
 
     void addAccount(Account account) throws AccountNumberNotUnicException;
-
-    Account findAccountById(Long id) throws AccountNotFoundException;
 
     Account findAccountByNumber(String accountNumber) throws AccountNotFoundException;
 

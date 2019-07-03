@@ -98,7 +98,7 @@ public class Account {
         return Collections.unmodifiableList(withdrawTransactions);
     }
 
-    public void setWithdrawTransaction(Transaction transaction) {
+    public void addWithdrawTransaction(Transaction transaction) {
         withdrawTransactions.add(transaction);
     }
 
@@ -106,7 +106,7 @@ public class Account {
         return Collections.unmodifiableList(depositTransactions);
     }
 
-    public void setDepositTransactions(Transaction transaction) {
+    public void addDepositTransactions(Transaction transaction) {
         depositTransactions.add(transaction);
     }
 

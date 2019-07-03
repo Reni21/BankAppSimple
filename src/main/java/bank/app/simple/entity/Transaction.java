@@ -20,12 +20,14 @@ public class Transaction {
     @GenericGenerator(name = "native", strategy = "native")
     private Long id;
     private TransactionType type;
+
     @ManyToOne
-    @JoinColumn(name = "account_id", insertable = false, updatable = false)
+    @JoinColumn(name = "from_account_id", referencedColumnName = "account_id")
     private Account fromAcc;
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "to_account_id", referencedColumnName = "account_id")
     private Account toAcc;
+
     private Double sum;
     private LocalDateTime time;
 
@@ -39,11 +41,25 @@ public class Transaction {
 
     @Override
     public String toString() {
+        String from;
+        String to;
+        if (fromAcc == null){
+            from = "null";
+        } else {
+            from = fromAcc.getOwner().getName();
+        }
+
+        if (toAcc == null){
+            to = "null";
+        } else {
+            to = toAcc.getOwner().getName();
+        }
+
         return "Transaction{" +
                 "id=" + id +
                 ", type='" + type + '\'' +
-                ", fromAcc=" + fromAcc.getOwner() +
-                ", toAcc=" + toAcc.getOwner() +
+                ", fromAcc=" + from +
+                ", toAcc=" + to +
                 ", sum=" + sum +
                 ", time=" + time +
                 '}';
