@@ -13,6 +13,7 @@ import bank.app.simple.serviceimpl.AccountServiceImpl;
 import bank.app.simple.serviceimpl.ExchangeRateServiceImpl;
 import bank.app.simple.serviceimpl.UserServiceImpl;
 import bank.app.simple.client.ExchangeRateExternalClient;
+import bank.app.simple.util.JpaUtil;
 
 public class Main {
     private static ExchangeRateDao rateDao = new ExchangeRateDaoImpl();
@@ -22,21 +23,30 @@ public class Main {
     private static ExchangeRateServiceImpl rateService = new ExchangeRateServiceImpl(rateDao, exchangeRateClient);
     private static AccountServiceImpl accountService = new AccountServiceImpl(new AccountDaoImpl(), transDao, rateService);
 
-    public static void main(String[] args) throws BankException {
-        fillTables();
-        System.out.println(
-                ">-------- Total balance from accounts for user US222 = " +
-                        accountService.totalUserBalansInUAH("US222") + " UAH");
+    public static void main(String[] args){
         try {
+            fillTables();
+            System.out.println(
+                    ">-------- Total balance from accounts for user US222 = " +
+                            accountService.totalUserBalansInUAH("US222") + " UAH");
+            try {
+                accountService.withdrawFromAccount(250.0, "AC444");
+            } catch (NotEnoughMoneyException ex) {
+                System.out.println(">-------- Exception: " + ex.getMessage());
+            }
+            accountService.depositAccount(400.0, "AC444");
             accountService.withdrawFromAccount(250.0, "AC444");
-        } catch (NotEnoughMoneyException ex) {
-            System.out.println(">-------- Exception: " + ex.getMessage());
-        }
-        accountService.depositAccount(400.0, "AC444");
-        accountService.withdrawFromAccount(250.0, "AC444");
 
-        accountService.transferMoney(1000.0, "AC111", "AC222");
-        accountService.transferMoney(10.0, "AC222", "AC444");
+            accountService.transferMoney(1000.0, "AC111", "AC222");
+            accountService.transferMoney(10.0, "AC222", "AC444");
+        } catch (BankException ex){
+            System.out.println(">-------- Exception: " + ex.getMessage());
+        } catch (Exception ex){
+            ex.printStackTrace();
+        } finally {
+            JpaUtil.closeEntMngFactory();
+        }
+
     }
 
     private static void fillTables() throws BankException {
